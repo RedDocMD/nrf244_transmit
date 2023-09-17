@@ -1,13 +1,16 @@
 #include <RF24.h>
 #include <RF24_config.h>
 #include <nRF24L01.h>
-#include <printf.h>
+#include <LibPrintf.h>
 
-RF24 rf;
-char msg[4];
-char addr[4] = "abc";
-int i;
-int mxm = 1000;
+const int CE = 7;
+const int CSN = 8;
+const int channel = 34;
+
+RF24 rf(CE, CSN);
+
+uint8_t msg[32];
+uint8_t addr[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
 
 void wait_forever() {
   while (true)
@@ -16,28 +19,46 @@ void wait_forever() {
 
 void setup() {
   Serial.begin(9600);
-  printf_begin();
+  randomSeed(analogRead(0));
 
   if (!rf.begin()) {
-    Serial.println("NRF24 setup failed");
+    printf("NRF24 setup failed\n");
     wait_forever();
   }
+
   rf.setAutoAck(false);
+  rf.setPALevel(RF24_PA_MIN);
+  rf.setDataRate(RF24_2MBPS);
   rf.setPayloadSize(sizeof(msg));
+  rf.setChannel(channel);
 
-  rf.setAddressWidth(sizeof(addr) - 1);
+  rf.setAddressWidth(sizeof(addr));
   rf.stopListening();
-  rf.openWritingPipe((const uint8_t *)addr);
+  rf.openWritingPipe(addr);
+}
 
-  i = 0;
+void printMsg() {
+  printf("[");
+  for (int i = 0; i < sizeof(msg); i++) {
+    if (i != 0) printf(", ");
+    printf("%02x", msg[i]);
+  }
+  printf("]");
+}
+
+void randMsg() {
+  for (int i = 0; i < sizeof(msg); i++) {
+    msg[i] = random(256);
+  }
 }
 
 void loop() {
-  i %= mxm;
-  snprintf(msg, sizeof(msg), "%03d", i);
+  randMsg();
   rf.write(msg, sizeof(msg));
-  Serial.print("Sent msg: ");
-  Serial.println(msg);
-  ++i;
+
+  printf("Sent msg: ");
+  printMsg();
+  printf("\n");
+
   delay(1000);
 }
