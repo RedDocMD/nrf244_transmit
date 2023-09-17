@@ -10,7 +10,7 @@ const int channel = 34;
 RF24 rf(CE, CSN);
 
 uint8_t msg[32];
-uint8_t addr[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
+uint8_t addr[5] = {0xCD, 0x02, 0x03, 0x04, 0xCD};
 
 void wait_forever() {
   while (true)
@@ -53,7 +53,7 @@ void randMsg() {
 }
 
 void loop() {
-  randMsg();
+  // randMsg();
   rf.write(msg, sizeof(msg));
 
   printf("Sent msg: ");
