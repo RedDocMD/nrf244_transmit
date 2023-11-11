@@ -44,7 +44,10 @@ void init_payload() {
   pay->meta = 0x00;
 }
 
-constexpr int WPM = 100;
+#ifndef WPM
+#define WPM 100
+#endif
+
 constexpr int WPM_TO_CPM = 5;
 constexpr int CPM = WPM * WPM_TO_CPM;
 constexpr int MS_IN_MIN = 60 * 1000;
@@ -125,5 +128,6 @@ void loop() {
   // printf("\n");
 
   ++burst_cnt;
+  // printf("%d\n", WPM);
   delay(get_delay());
 }
